@@ -1,27 +1,48 @@
 # from bs4 import BeautifulSoup
 import requests
 import json
+import time
 
 
 # this method will request vrv normally and get the policy, signature, and key_pair_id dynamically
 def get_vrv_fields():
-    pass
-    # print title and id search results
+    url = "https://vrv.co/?q=attack%20on%20titan"
+    # url = "https://vrv.co"
+    response = requests.get(url)
+    with open('data.txt', 'w') as f:
+        f.write(response.text)
+    # parse signature
+    signature_start_index = str(response.text).find("Signature=") + 10
+    signature_end_index = str(response.text).find("&", signature_start_index)
+    signature = str(response.text)[signature_start_index:signature_end_index]
+    # parse policy
+    policy_start_index = str(response.text).find("Policy=") + 7
+    policy_end_index = str(response.text).find("&", policy_start_index)
+    policy = str(response.text)[policy_start_index:policy_end_index]
+
+    # parse n
+    n_start_index = str(response.text).find("n=") + 2
+    n_end_index = str(response.text).find("&", n_start_index)
+    n = str(response.text)[n_start_index:n_end_index]
+    print(signature, policy, n)
+
+    return signature, policy, n
 
 
-def search_title(title):
+# print title and id search results
+def search_title(title, signature, policy, n):
     # fields for formatting query url
     title = title.replace(" ", "%20")
-    policy = "eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6XC9cL2FwaS52cnYuY29cL2Rpc2NcL3B1YmxpY1wvdj9cL1VTXC9NMlwvLVwvLVwvKiIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTY1MTc4ODQ2NX19fV19"
-    signature = "Ny3UchW9fcQoCax557d4ooTKnJihH~hoHHSuI4dF~OttmZEn7qd2mLOIstHtXl0xFffkInJRzCIuCzSM4EwJDPg49mCCkEKegEOdOf6iKIMFTz8KLej5GWvfpvfcLbHrc17ToHzCAyElNglNzgFmQ6xSihDNV8bzCYpDjWZb1rrb6hPIMj7AtCLxEFxvsE9Za6RIIdvkuZ1FW6wEu-mAiHf9MiHotO63GjPS8TCZV824u8zBCFFJC0~L6Y1FSU3AetLKz-wvsWoTfOwdX2M2s7kq8IkICzfD~LF37x~4UC8toNp4wRMvg3wMhpsBUaPlrDT1NCo1b1bROdFym~y03A__"
+    # policy = "yJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6XC9cL2FwaS52cnYuY29cL2Rpc2NcL3B1YmxpY1wvdj9cL1VTXC9NMlwvLVwvLVwvKiIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTY1MTg3NDg2NX19fV19"
+    # signature = "HVt44rjNK5CaE1KBmCv1tnq9i5aXs4U2JcWtrb4saAdGiG9aqlCJzcNlcS1H61H2QvnQ~lsziE-mZBxhxBXUTFatRbv9~7LPxtljye~IHXgvvo5RYOkfHzzuG4DGQGmhj6qEAt2CZoUaSDibagqpRyU3qjWZYXZgxiq3qHuc-x4PvNIMFY-p0kaWAN4Il~mPATi7JJvgwYdnJWUUolzE0EvndqwJyV6Tp6rekvpJet4hZb6g6bE1s8EsfUhzNiv33f1bnLvWIng12Hdi9i2UO-zFnpxvMnSBu~luM8iX4eiF1OdpiuDVrc~i6N-LpZuehXxdmmol1w~hqpvIPj6cWw__"
     key_pair_id = "APKAJMWSQ5S7ZB3MF5VA"
     # full url to query
-    url = f"https://api.vrv.co/disc/public/v1/US/M2/-/-/search?q={title}&n=6&Policy={policy}&Signature={signature}&Key-Pair-Id={key_pair_id}"
+    url = f"https://api.vrv.co/disc/public/v1/US/M2/-/-/search?q={title}&n={n}&Policy={policy}&Signature={signature}&Key-Pair-Id={key_pair_id}"
     # query vrv for 'title'
     response = requests.get(url).json()
     # write json response to file
-    with open('data.json', 'w') as f:
-        json.dump(response, f)
+    # with open('data.json', 'w') as f:
+    #     json.dump(response, f)
     response = response["items"]  # go into item field of response dict
     items = response[1]["items"]  # should be a list of anime
     # this will list the anime names that have come back from the search by looping through the items list and printing the title field from each dict
@@ -81,16 +102,17 @@ def get_episodes_by_season_id():
 
 # main method
 def main():
-    get_vrv_fields()
+    signature, policy, n = get_vrv_fields()
+    time.sleep(3)
     title_input = "attack on titan"
     # this is the list of search results - list of dicts
-    titles_and_ids = search_title(title_input)
+    titles_and_ids = search_title(title_input, signature, policy, n)
     print(titles_and_ids)
     # these the the title and series id of the chosen anime
-    title, series_id = decide_anime(titles_and_ids)
-    print(title, series_id)
+    # title, series_id = decide_anime(titles_and_ids)
+    # print(title, series_id)
     # this is the season_id of the chosen show/season
-    season_id = ""
+    # season_id = ""
 
     # series_id = get_id_by_title(title)
     # get_seasons(series_id)
