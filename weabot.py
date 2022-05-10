@@ -6,8 +6,9 @@ import time
 
 # this method will request vrv normally and get the policy, signature, and key_pair_id dynamically
 def get_vrv_fields():
-    url = "https://vrv.co/?q=attack%20on%20titan"
-    # url = "https://vrv.co"
+    # url = "https://vrv.co/?q=attack%20on%20titan"
+    url = "https://vrv.co"
+    # url = "https://api.vrv.co/core/index"
     response = requests.get(url)
     with open('data.txt', 'w') as f:
         f.write(response.text)
